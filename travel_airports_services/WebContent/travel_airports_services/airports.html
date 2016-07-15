@@ -78,6 +78,12 @@
 					</tr>
 				</tbody>
 			</table>
+			
+			<div>
+				<div>View <select ng-model="viewby" ng-change="setItemsPerPage(viewby)"><option>10</option><option>20</option><option>50</option><option selected>100</option></select> records.<div>
+	    		<uib-pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()" class="pagination-sm" items-per-page="itemsPerPage" max-size="maxSize" boundary-links="true" force-ellipses="true" rotate="false"></uib-pagination>
+			</div>
+			
 			<hr>
 			<br>
 			<!-- new, edit and delete buttons -->
@@ -181,9 +187,9 @@
 			var url = '../../js/travel_airports_services/airports.js';
 
 			$http.get(url)
-			.success(function(data){
-				$scope.data = data;
-			});
+				.success(function(data){
+					$scope.data = data;
+				});
 			
 			$scope.selectedEntry;
             $scope.operation = 'show';
@@ -332,7 +338,33 @@
 			$scope.formats = ['yyyy/MM/dd', 'dd-MMMM-yyyy', 'dd.MM.yyyy', 'shortDate'];
   			$scope.format = $scope.formats[0];
 
+			// pagination
+			$scope.viewby = 100;
+			$http.get(url + "?count")
+				.success(function(count){
+					$scope.totalItems = count;
+				});
+  			
+  			$scope.currentPage = 1;
+  			$scope.itemsPerPage = $scope.viewby;
+  			$scope.maxSize = 10;
 			
+			$scope.setPage = function (pageNo) {
+			    $scope.currentPage = pageNo;
+			    $scope.pageChanged();
+			};
+			
+			$scope.pageChanged = function() {
+			    $http.get(url + "?offset=" + ($scope.viewby*($scope.currentPage-1) + "&limit=" + $scope.viewby))
+					.success(function(data){
+						$scope.data = data;
+					});
+			};
+			
+			$scope.setItemsPerPage = function(num) {
+			  	$scope.itemsPerPage = num;
+			  	$scope.setPage(1);
+			}
 		});
 		
 	</script>
